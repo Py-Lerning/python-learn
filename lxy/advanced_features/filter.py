@@ -15,7 +15,7 @@ def delete_empty(s):
     return s and s.strip()
 
 
-# 用filter求素数
+# 用filter求素数 。单步调试的解释：https://www.cnblogs.com/ctys/p/12391874.html
 # 1.构造一个从3开始的生成器。这是一个无限序列。
 def odd_generator():
     n = 1
@@ -26,7 +26,11 @@ def odd_generator():
 
 # 2.定义一个筛选函数：
 def not_divisible(n):
-    return lambda x: x % n > 0
+    def func(x):
+        return x % n > 0
+    return func
+
+    # return lambda x: x % n > 0
 
 
 # 3.定义一个生成器，不断返回下一个素数
@@ -99,9 +103,17 @@ if __name__ == "__main__":
     print(list(filter(delete_empty, ["1", ""])))
 
     print("----")
-    ge = odd_generator()
-    ge = filter(not_divisible(3), ge)
-    print(next(ge))
 
-    L = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    print(L[2::-1])
+    for n in primes():
+        if n < 1000:
+            print(n)
+        else:
+            break
+
+    print("----")
+    # ge = odd_generator()
+    # ge = filter(not_divisible(3), ge)
+    # print(next(ge))
+    #
+    # L = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    # print(L[2::-1])
