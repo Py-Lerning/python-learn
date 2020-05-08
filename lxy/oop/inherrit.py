@@ -61,6 +61,7 @@ def run_twice(animal):
     animal.run()
     animal.run()
 
+
 if __name__ == "__main__":
     a = Animal()
     a.run()
