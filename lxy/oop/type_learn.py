@@ -70,7 +70,8 @@ class ModelMetaclass(type):
 class Model(dict, metaclass=ModelMetaclass):
     def __init__(self, **kw):
         super(Model, self).__init__(**kw)
-
+        # 这时：self已经有了属性了：{'id': 12345, 'name': 'Michael', 'email': 'test@orm.org', 'password': 'my-pwd'}，
+        # 所以是调用了父类的方法
         print()
 
     # 调用 getattr(self, k, None) 方法时，实际上是调用了这个方法。这个方法进行了重写，从self这个{} 中获取字段。
