@@ -14,4 +14,5 @@ build/
 tests/report/
 
 venv
+env
 .idea
