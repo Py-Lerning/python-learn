@@ -1,72 +1,59 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import unittest
 from typing import Any
 
-
-# 【文章：Python的__getattr__和__getattribute__】https://www.cnblogs.com/blackmatrix/p/5681480.html
-# 总结：
-# __getattr__
-# __getattr__在当前主流的Python版本中都可用，重载__getattr__方法对类及其实例未定义的属性有效。也就属性是说，
-# 如果访问的属性存在，就不会调用__getattr__方法。这个属性的存在，包括类属性和实例属性。
-
-# __getattribute__
-# __getattribute__仅在新式类中可用，重载__getattrbute__方法对类实例的每个属性访问都有效。
-
-# 同时定义__getattribute__和__getattr__
-# __getattr__方法不会再被调用，除非显示调用__getattr__方法或引发AttributeError异常。
-
-# Dict类，这个类的行为和dict一致，但是可以通过属性来访问
-class Dict(dict):
-
-    def __init__(self, **kw):
-        super().__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError as e:
-            raise AttributeError(r"'Dict' object has no attribute '%s'" % key)
-            # print("遇到了异常")
-            # raise
-
-    def __setattr__(self, key, value):
-        print("调用了一次set")
-        self[key] = value
+from lxy.err_learn.dict_test import Dict
 
 
-class Test:
+# 编写单元测试时，我们需要编写一个测试类，从unittest.TestCase继承。
+class TestDict(unittest.TestCase):
+    # 以test开头的方法就是测试方法，不以test开头的方法不被认为是测试方法，测试的时候不会被执行。
+    def test_init(self):
+        d = Dict(a=1, b='test')
+        self.assertEqual(d.a, 1)
+        self.assertEqual(d.b, 'test')
+        self.assertTrue(isinstance(d, dict))
 
-    def __init__(self) -> None:
-        super().__init__()
+    def test_key(self):
+        d = Dict()
+        d['key'] = 'value'
+        self.assertEqual(d.key, 'value')
 
+    def test_attr(self):
+        d = Dict()
+
+        # 这种方式，调用一下 __setattr__ 方法
+        d.key = 'value'
+        self.assertTrue('key' in d)
+        self.assertEqual(d['key'], 'value')
+
+    # 另一种重要的断言就是期待抛出指定类型的Error，比如通过d['empty']访问不存在的key时，断言会抛出KeyError：
+    def test_keyerror(self):
+        d = Dict()
+        with self.assertRaises(KeyError):
+            # d['empty']就是dict用法。如果没有这个属性就直接报错 KeyError
+            value = d['empty']
+
+    # 通过d.empty访问不存在的key时，我们期待抛出AttributeError：
+    def test_attrerror(self):
+        d = Dict()
+        with self.assertRaises(AttributeError):
+            # d.empty就是object用法。如果没有属性，就走我们自定义的 __getattr__
+            value = d.empty
+
+    # 可以在单元测试中编写两个特殊的setUp()和tearDown()方法。这两个方法会分别在每调用一个测试方法的前后分别被执行。
+    def setUp(self):
+        print('setUp...')
+
+    def tearDown(self):
+        print('tearDown...')
 
 if __name__ == "__main__":
-    d = {'Michael': 95, 'Bob': 75, 'Tracy': 85}
+    # 这样就可以把mydict_test.py当做正常的python脚本运行：
+    unittest.main()
 
-    # 报错，dict是不可以这样进行访问的：AttributeError: 'dict' object has no attribute 'name'
-    # print("aaa", d.name)
+    # 另一种方法是在命令行通过参数 - m unittest直接运行单元测试：
+    # python -m unittest mydict_test
 
-    # 因为d没有name这个属性，就会直接报错。d["name"]是dict的用法，所以不经过__getattr__ 方法，直接报错：KeyError: 'name'
-    # print(d["name"])
 
-    d2 = Dict()
-
-    # d2没有name这个属性，但是d2也是自定义的一个class，所以可以d.name进行访问。没有，就走到 __getattr__ 方法中
-    # print(d2.name)
-
-    t = Test()
-    # 普通对象可以这样访问t.name，但是没有属性，就会报错。AttributeError: 'Test' object has no attribute 'name'
-    # print(t.name)
-
-    # 普通对象是不可以这么访问的：TypeError: 'Test' object is not subscriptable
-    print(t["name"])
-
-    '''
-    getitem, setitem是序列,映射类型才有的, 比如字符串, 列表, 字典: getitem(key)方法用来访问个体元素。对序列类型，key只能是非负整数，对映射类型，关键字可以是任意Python不变对象。 setitem()方法给一个元素设定新值
-
-__getattr__需要自己定义: 
-1.访问一个类实例 x 的属性时，比如 x.a，解释器会先查找 x.__dict__["a"]，
-2.若没有找到，则接着查询 x.__class__.__dict__["a"]，
-3.如果还没找到，则按照上面提到的搜索顺序继续查询该类的父类们的名字空间，
-4.如果还是没有找到，就要查看该类是否定义了__getattr__()方法，如果有这个方法就使用这个方法继续查找。
-    '''
