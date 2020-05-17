@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import unittest
-from typing import Any
 
 from lxy.err_learn.dict_test import Dict
 
